@@ -60,9 +60,6 @@ class State:
             if mark == Const.MARK_X:
                 self._state = Const.STATE_TURN_O
 
-    def getState(self):
-        return self._state
-    
     def unmove(self,row,col):
         State.rowOk(row)
         State.colOk(col)
@@ -80,7 +77,13 @@ class State:
 
         self._state = Const.STATE_TURN_O
         self._unplayed = Const.ROWS*Const.COLS
+
+    def getBoard(self):
+        return [[self._board[row][col]  for col in range(Const.COLS)] for row in range(Const.ROWS)]
         
+    def getState(self):
+        return self._state
+    
     def __init__(self):
         self.reset()
 
