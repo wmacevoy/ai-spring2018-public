@@ -19,9 +19,9 @@ class MinMaxAgent:
             if self.side == Const.MARK_X: ans = 1
             else: ans = -1
         elif state == Const.STATE_DRAW:
-            return 0
+            ans = 0
 
-        if ans != None: return ans
+        if ans != None: return (ans,0)
 
         iside = 0
         if self.side == Const.MARK_O: iside = 1
@@ -32,11 +32,13 @@ class MinMaxAgent:
         else: iturn = -1
 
         myTurn = (iside == iturn)
+        myOptions = 0
 
         for move in game.getMoves():
             move.play(game)
-            moveValue=self.value(game)
+            (moveValue,moveOptions)=self.value(game)
             move.unplay(game)
+            myOptions = myOptions + 1 + moveOptions 
             if ans == None:
                 ans = moveValue
             else:
@@ -45,16 +47,24 @@ class MinMaxAgent:
                 else:
                    ans = min(ans,moveValue)
 
-        return ans
+        return (ans,myOptions)
 
     def move(self,game):
-        maxValue=self.value(game)
+        (maxValue,maxOptions)=self.value(game)
         playable = []
+        maxPlayableOption = 0
         for move in game.getMoves():
             move.play(game)
-            moveValue=self.value(game)
+            (moveValue,moveOptions)=self.value(game)
             move.unplay(game)
             if moveValue == maxValue:
-                playable.append(move)
-        spot=random.randint(0,len(playable)-1)
-        return playable[spot]
+                playable.append((move,moveOptions))
+                maxPlayableOption = max(maxPlayableOption,moveOptions)
+
+        bestPlayable = []
+        for (move,options) in playable:
+            if options == maxPlayableOption:
+                bestPlayable.append(move)
+        
+        spot=random.randint(0,len(bestPlayable)-1)
+        return bestPlayable[spot]
