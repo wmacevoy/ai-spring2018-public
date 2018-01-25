@@ -28,6 +28,12 @@ class Const:
         if mark != Const.MARK_NONE and mark != Const.MARK_O and mark != Const.MARK_X:
             raise ValueError("mark (" + str(mark) + ") must be MARK_NONE, MARK_O or MARK_X")
 
+    def markStr(mark):
+        if mark == Const.MARK_O: return "o"
+        if mark == Const.MARK_X: return "x"
+        if mark == Const.MARK_NONE: return " "
+        return "unkown mark (" + str(mark) + ")"
+
     def stateOk(state):
         if not isinstance(state,int):
             raise ValueError("state must be an integer")
@@ -35,3 +41,11 @@ class Const:
            (state != Const.STATE_WIN_O) and (state != Const.STATE_WIN_X) and \
            (state != Const.STATE_DRAW):
             raise ValueError("state (" + str(state) + ") must be STATE_TURN_O, STATE_TURN_X, STATE_WIN_X, STATE_WIN_O or STATE_DRAW")
+
+    def stateStr(state):
+        if state == Const.STATE_TURN_O: return "o's turn"
+        if state == Const.STATE_TURN_X: return "x's turn"
+        if state == Const.STATE_WIN_O: return "o won"
+        if state == Const.STATE_WIN_X: return "x won"
+        if state == Const.STATE_DRAW: return "draw"
+        return "unknown state (" + str(state) + ")"
