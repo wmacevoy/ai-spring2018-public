@@ -1,21 +1,21 @@
 import random
 from Const import Const
 from Move import Move
-from State import State
+from Game import Game
 
 class RandomAgent:
     def __init__(self):
         pass
 
-    def move(self,state):
+    def move(self,game):
         mark = None
-        if state.getState() == Const.STATE_TURN_O:
+        if game.getState() == Const.STATE_TURN_O:
             mark = Const.MARK_O
-        if state.getState() == Const.STATE_TURN_X:
+        if game.getState() == Const.STATE_TURN_X:
             mark = Const.MARK_X
         if mark == None:
-            raise ValueError("state must be playable")
-        board = state.getBoard()
+            raise ValueError("game must be playable")
+        board = game.getBoard()
         playable = []
         for row in range(Const.ROWS):
             for col in range(Const.COLS):
