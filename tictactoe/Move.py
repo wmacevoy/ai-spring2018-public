@@ -15,6 +15,17 @@ class Move:
     def getMark(self):
         return self._mark
 
+    def __str__(self):
+        if self._mark == None:
+            mark=''
+        elif self._mark == Const.MARK_X:
+            mark='x'
+        elif self._mark == Const.MARK_O:
+            mark='o'
+        else:
+            mark='?'
+        return mark + chr(ord('a')+self._row)+chr(ord('1')+self._col)
+
     def parse(str):
         mark = None
         if str[0] == 'x' or str[0] == 'X': mark = Const.MARK_X
@@ -27,14 +38,14 @@ class Move:
         col=ord(str[i+1])-ord('1')
         return Move(row,col,mark)
 
-    def play(self, state):
+    def play(self, game):
         mark = self._mark
         if mark == None:
-            if state.getState() == Const.STATE_TURN_X:
+            if game.getState() == Const.STATE_TURN_X:
                 mark = Const.MARK_X
             if state.getState() == Const.STATE_TURN_O:
                 mark = Const.MARK_O
-        state.move(self._row,self._col,mark)
+        game.move(self._row,self._col,mark)
 
-    def undo(self, state):
-        state.unmove(self._row,self._col)
+    def unplay(self, game):
+        game.unmove(self._row,self._col)
