@@ -2,21 +2,23 @@ import random
 from Const import Const
 from Move import Move
 from Game import Game
+from functools import lru_cache
 
 class MinMaxAgent:
     def __init__(self, side):
         if side != Const.MARK_O and side != Const.MARK_X:
             raise ValueError("side must be MARK_X or MARK_O")
-        self.side = side
+        self._side = side
+        self._valueCache = {}
 
-    def value(self,game):
+    def uncachedValue(self,game):
         ans = None
         state = game.getState()
         if state == Const.STATE_WIN_O:
-            if self.side == Const.MARK_O: ans = 1
+            if self._side == Const.MARK_O: ans = 1
             else: ans = -1
         elif state == Const.STATE_WIN_X:
-            if self.side == Const.MARK_X: ans = 1
+            if self._side == Const.MARK_X: ans = 1
             else: ans = -1
         elif state == Const.STATE_DRAW:
             ans = 0
@@ -24,7 +26,7 @@ class MinMaxAgent:
         if ans != None: return (ans,0)
 
         iside = 0
-        if self.side == Const.MARK_O: iside = 1
+        if self._side == Const.MARK_O: iside = 1
         else: iside = -1
 
         iturn = 0
@@ -48,6 +50,13 @@ class MinMaxAgent:
                    ans = min(ans,moveValue)
 
         return (ans,myOptions)
+
+    def value(self,game):
+        index=game.getIndex()
+        if index in self._valueCache: return self._valueCache[index]
+        ans = self.uncachedValue(game)
+        self._valueCache[index]=ans
+        return ans
 
     def move(self,game):
         (maxValue,maxOptions)=self.value(game)

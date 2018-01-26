@@ -116,3 +116,25 @@ class Game:
     def play(self,moves):
         for move in moves.split():
             Move.parse(move).play(self)
+
+    def __str__(self):
+        ans = "\n"
+        for row in range(Const.ROWS):
+            s="";
+            for col in range(Const.COLS):
+                s=s+Const.markStr(self._board[row][col])
+            ans = ans + s + "\n"
+        return ans
+
+    def getIndex(self):
+        i = 0
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                board=self._board[row][col]
+                x = 0
+                if board == Const.MARK_X:
+                    x = 1
+                elif board == Const.MARK_O:
+                    x = 2
+                i = 3*i + x
+        return i
