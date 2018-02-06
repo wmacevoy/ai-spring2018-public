@@ -13,8 +13,8 @@ public class Main {
     public static void main(String[] args) {
         GamePlay play = new GamePlay() {
             public Agent createAgent(Mark side) {
-                if (side == Mark.O) return new RandomAgent(Mark.O);
-                else return new MinMaxAgent(Mark.X, Integer.MAX_VALUE);
+                if (side == Mark.O) return new MinMaxAgent(Mark.O, 7);
+                else return new MinMaxAgent(Mark.X, 7);
             }
         };
         while (!play.isOver()) {

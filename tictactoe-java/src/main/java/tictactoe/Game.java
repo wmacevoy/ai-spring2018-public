@@ -14,8 +14,9 @@ import java.util.Collection;
  */
 public class Game implements Comparable<Game> {
 
-    public static final int ROWS = 3;
-    public static final int COLS = 3;
+    public static final int ROWS = 5;
+    public static final int COLS = 5;
+    public static final int WIN_LENGTH = 4;
 
     private Mark[][] board = new Mark[ROWS][COLS];
     private State state = State.TURN_O;
@@ -122,19 +123,19 @@ public class Game implements Comparable<Game> {
     }
 
     boolean winRow(int row, int col) {
-        return length(row, col, 1, 0) >= 3;
+        return length(row, col, 1, 0) >= WIN_LENGTH;
     }
 
     boolean winCol(int row, int col) {
-        return length(row, col, 0, 1) >= 3;
+        return length(row, col, 0, 1) >= WIN_LENGTH;
     }
 
     boolean winMainDiag(int row, int col) {
-        return length(row, col, 1, 1) >= 3;
+        return length(row, col, 1, 1) >= WIN_LENGTH;
     }
 
     boolean winOffDiag(int row, int col) {
-        return length(row, col, 1, -1) >= 3;
+        return length(row, col, 1, -1) >= WIN_LENGTH;
     }
 
     public boolean win(int row, int col) {

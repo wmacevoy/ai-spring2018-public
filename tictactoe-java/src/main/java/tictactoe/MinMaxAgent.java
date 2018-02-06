@@ -31,7 +31,7 @@ public class MinMaxAgent implements Agent {
             return (state.turn() == side) ? 1 : -1;
         }
         if (depth >= maxDepth) {
-            return 0;
+            return -1;
         }
         boolean maximize = (state.turn() == side);
         double value = maximize ? -1 : 1;
