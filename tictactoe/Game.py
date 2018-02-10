@@ -2,6 +2,7 @@ from Const import Const
 from Move import Move
 
 class Game:
+    ROWS = 3
     def over(self):
         return \
             self._state == Const.STATE_WIN_O or \
@@ -126,6 +127,26 @@ class Game:
             ans = ans + s + "\n"
         return ans
 
+    def copyTo(self,target):
+        target._board = [[self._board[row][col] for col in range(Const.COLS)] for row in range(Const.ROWS)]
+        target._state = self._state
+        target._unplayed = self._unplayed
+
+    def clone(self):
+        ans = Game()
+        self.copyTo(ans)
+        return ans
+
+    def __hash__(self):
+        tuple = (self._board[k % Const.ROWS][k // Const.ROWS] for k in range(Const.ROWS*Const.COLS))
+        return hash(tuple)
+
+    def __eq__(self, other):
+        return other != None and (self._board == other._board)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def getIndex(self):
         i = 0
         for row in range(Const.ROWS):
@@ -138,3 +159,41 @@ class Game:
                     x = 2
                 i = 3*i + x
         return i
+
+    def flipRows(self):
+        ans=self.clone()
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                ans._board[Const.ROWS-row-1][col]=self._board[row][col]
+        return ans
+
+    def flipCols(self):
+        ans = self.clone()
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                ans._board[row][Const.COLS-col-1]=self._board[row][col]
+        return ans
+
+    def flipRowsAndCols(self):
+        ans = self.clone()
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                ans._board[Const.ROWS-row-1][Const.COLS-col-1]=self._board[row][col]
+        return ans
+
+    def transpose(self):
+        if Const.ROWS != Const.COLS: return None
+        ans = self.clone()
+        for row in range(Const.ROWS):
+            for col in range(Const.COLS):
+                ans._board[col][row]=self._board[row][col]
+        return ans
+
+    def offDiagonalTranspose(self):
+        if Const.ROWS != Const.COLS: return None        
+        return self.flipRows().transpose()
+    
+    def getEquivClass(self):
+        return [self.clone(),self.flipRows(),self.flipCols(),self.flipRowsAndCols()]
+        
+        
