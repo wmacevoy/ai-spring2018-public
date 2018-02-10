@@ -18,7 +18,7 @@ public class Main {
         SteepestDescentMinimizer minimizer = new SteepestDescentMinimizer();
         minimizer.setProblem(problem);
 
-        for (int trial = 0; trial < 10_000_000; ++trial) {
+        for (int trial = 0; trial < 1; ++trial) {
             for (int i = 0; i < dim; ++i) {
                 problem.setRealParameterValue(i, 0);
             }

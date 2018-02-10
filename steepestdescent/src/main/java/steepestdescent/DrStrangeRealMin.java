@@ -6,6 +6,7 @@
 package steepestdescent;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  *
@@ -13,35 +14,26 @@ import java.util.Arrays;
  */
 public class DrStrangeRealMin implements RealMin {
     double[] values = new double[2];
-    public static final int IJOKE = 0;
-    public static final int IFIGHT = 1;
+    private static final String[] names = new String[] { "joke", "fight" };
+    private static final HashMap < String, Integer > indexes = new HashMap < String, Integer > ();
+    static {
+        for (int i=0; i<names.length; ++i) {
+            indexes.put(names[i],i);
+        }
+    }
+    public static final int IJOKE = indexes.get("joke");
+    public static final int IFIGHT = indexes.get("fight");
 
     @Override
     public int getRealParameterSize() {
-        return 2;
+        return names.length;
     }
 
     @Override
-    public String getRealParameterName(int index) {
-        switch (index) {
-            case 0:
-                return "joke";
-            case 1:
-                return "fight";
-        }
-        throw new IndexOutOfBoundsException();
-    }
+    public String getRealParameterName(int i) { return names[i]; }
 
     @Override
-    public int getRealParameterIndex(String name) {
-        switch (name) {
-            case "joke":
-                return IJOKE;
-            case "fight":
-                return IFIGHT;
-        }
-        throw new IndexOutOfBoundsException();
-    }
+    public int getRealParameterIndex(String name) { return indexes.get(name); }
     
 
     @Override
@@ -67,8 +59,21 @@ public class DrStrangeRealMin implements RealMin {
 
     @Override
     public double getValue() {
+        double d2=0;
         double joke = values[IJOKE];
+        if (joke < 0) {
+            d2 += joke*joke;
+            joke = 0;
+        }
         double fight = values[IFIGHT];
-        return Math.pow(joke+fight - 6, 2) + Math.pow(fight - 4, 2);
+        if (fight < 0) {
+            d2 += fight*fight;
+            fight = 0;
+        }
+        if (fight > 2) {
+            d2 += (fight-2)*(fight-2);
+            fight = 2;
+        }
+        return Math.pow(joke+fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
     }
 }
