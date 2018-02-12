@@ -2,7 +2,6 @@ from Const import Const
 from Move import Move
 
 class Game:
-    ROWS = 3
     def over(self):
         return \
             self._state == Const.STATE_WIN_O or \
@@ -53,13 +52,13 @@ class Game:
         return self._repeats(row,col,rowDir,colDir)+self._repeats(row,col,-rowDir,-colDir)-1
 
     def _winRow(self,row,col):
-        return self._length(row,col,1,0) >= 3
+        return self._length(row,col,1,0) >= Const.WIN_LENGTH
     def _winCol(self,row,col):
-        return self._length(row,col,0,1) >= 3
+        return self._length(row,col,0,1) >= Const.WIN_LENGTH
     def _winMainDiag(self,row,col):
-        return self._length(row,col,1,1) >= 3
+        return self._length(row,col,1,1) >= Const.WIN_LENGTH
     def _winOffDiag(self,row,col):
-        return self._length(row,col,1,-1) >= 3
+        return self._length(row,col,1,-1) >= Const.WIN_LENGTH
 
     def _win(self,row,col):
         return self._winRow(row,col) or self._winCol(row,col) or \

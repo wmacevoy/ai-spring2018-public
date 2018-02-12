@@ -9,6 +9,7 @@ class Const:
     STATE_WIN_O = 3
     STATE_WIN_X = 4
     STATE_DRAW = 5
+    WIN_LENGTH = 3
 
     def rowOk(row):
         if not isinstance(row,int):
@@ -32,7 +33,7 @@ class Const:
         if mark == Const.MARK_O: return "o"
         if mark == Const.MARK_X: return "x"
         if mark == Const.MARK_NONE: return " "
-        return "unkown mark (" + str(mark) + ")"
+        return "?"
 
     def stateOk(state):
         if not isinstance(state,int):
