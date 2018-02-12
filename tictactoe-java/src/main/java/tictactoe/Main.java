@@ -11,10 +11,12 @@ package tictactoe;
  */
 public class Main {
     public static void main(String[] args) {
+        int maxDepth = 12;
+        int cacheSize = 10_000_000;
         GamePlay play = new GamePlay() {
             public Agent createAgent(Mark side) {
-                if (side == Mark.O) return new MinMaxAgent(Mark.O, 7);
-                else return new MinMaxAgent(Mark.X, 7);
+                if (side == Mark.O) return new MinMaxAgent(Mark.O, maxDepth,cacheSize);
+                else return new MinMaxAgent(Mark.X , maxDepth,cacheSize);
             }
         };
         while (!play.isOver()) {

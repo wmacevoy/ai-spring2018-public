@@ -60,7 +60,7 @@ public enum Mark {
             case O:
                 return "o";
             case UNMARKED:
-                return " ";
+                return ".";
         }
         throw new IllegalStateException();
     }

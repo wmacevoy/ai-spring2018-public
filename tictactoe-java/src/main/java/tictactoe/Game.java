@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Game implements Comparable<Game> {
 
-    public static final int ROWS = 5;
-    public static final int COLS = 5;
+    public static final int ROWS = 8;
+    public static final int COLS = 8;
     public static final int WIN_LENGTH = 4;
 
     private Mark[][] board = new Mark[ROWS][COLS];
@@ -171,7 +171,13 @@ public class Game implements Comparable<Game> {
     public String toString() {
         StringBuilder ans = new StringBuilder();
 
+        ans.append(" ");
+        for (int col=0; col < COLS; ++col) {
+            ans.append(((char)(col+'1')));
+        }
+        ans.append("\n");
         for (int row = 0; row < ROWS; ++row) {
+            ans.append(((char)(row+'a')));
             for (int col = 0; col < COLS; ++col) {
                 ans.append(board[row][col].toString());
             }

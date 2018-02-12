@@ -16,13 +16,21 @@ public class MinMaxAgent implements Agent {
 
     Mark side;
     int maxDepth = Integer.MAX_VALUE;
+    int cacheCapacity;
+    GameCache<Double> cache;
 
-    public MinMaxAgent(Mark _side, int _maxDepth) {
+    public MinMaxAgent(Mark _side, int _maxDepth, int _cacheCapacity) {
         side = _side;
         maxDepth = _maxDepth;
+        cacheCapacity = _cacheCapacity;
+        cache = new GameCache<Double>(cacheCapacity);
+    }
+    
+    double getHeuristicValue(Game game) {
+            return -1;
     }
 
-    double getValue(Game game, int depth) {
+    double getUncachedValue(Game game, int depth) {
         State state = game.getState();
         if (state.over()) {
             if (state == State.DRAW) {
@@ -31,7 +39,7 @@ public class MinMaxAgent implements Agent {
             return (state.turn() == side) ? 1 : -1;
         }
         if (depth >= maxDepth) {
-            return -1;
+            return getHeuristicValue(game);
         }
         boolean maximize = (state.turn() == side);
         double value = maximize ? -1 : 1;
@@ -60,6 +68,14 @@ public class MinMaxAgent implements Agent {
             }
         }
 
+        return value;
+    }
+    
+    double getValue(Game game, int depth) {
+        Double value = cache.get(game);
+        if (value != null) return value;
+        value = getUncachedValue(game,depth);
+        cache.add(game,value);
         return value;
     }
 
