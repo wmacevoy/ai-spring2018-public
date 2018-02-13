@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Game implements Comparable<Game> {
 
-    public static final int ROWS = 8;
-    public static final int COLS = 8;
+    public static final int ROWS = 5;
+    public static final int COLS = 5;
     public static final int WIN_LENGTH = 4;
 
     private Mark[][] board = new Mark[ROWS][COLS];
@@ -24,6 +24,14 @@ public class Game implements Comparable<Game> {
 
     public State getState() {
         return state;
+    }
+
+    public boolean over() {
+        return state.over();
+    }
+
+    public Mark turn() {
+        return state.turn();
     }
 
     public static void rowOk(int row) {
@@ -161,6 +169,16 @@ public class Game implements Comparable<Game> {
         reset();
     }
 
+    public Game(Game copy) {
+        for (int row = 0; row < ROWS; ++row) {
+            for (int col = 0; col < COLS; ++col) {
+                board[row][col] = copy.board[row][col];
+            }
+        }
+        state = copy.state;
+        unplayed = copy.unplayed;
+    }
+
     public void play(String moves) {
         for (String move : moves.split(" ")) {
             Move.parse(move).play(this);
@@ -172,12 +190,12 @@ public class Game implements Comparable<Game> {
         StringBuilder ans = new StringBuilder();
 
         ans.append(" ");
-        for (int col=0; col < COLS; ++col) {
-            ans.append(((char)(col+'1')));
+        for (int col = 0; col < COLS; ++col) {
+            ans.append(((char) (col + '1')));
         }
         ans.append("\n");
         for (int row = 0; row < ROWS; ++row) {
-            ans.append(((char)(row+'a')));
+            ans.append(((char) (row + 'a')));
             for (int col = 0; col < COLS; ++col) {
                 ans.append(board[row][col].toString());
             }
@@ -196,10 +214,8 @@ public class Game implements Comparable<Game> {
         target.unplayed = unplayed;
     }
 
-    public Game clone() {
-        Game ans = new Game();
-        copyTo(ans);
-        return ans;
+    public Game copy() {
+        return new Game(this);
     }
 
     @Override
@@ -222,7 +238,7 @@ public class Game implements Comparable<Game> {
     }
 
     Game flipRows() {
-        Game ans = clone();
+        Game ans = copy();
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                 ans.board[ROWS - row - 1][col] = board[row][col];
@@ -232,7 +248,7 @@ public class Game implements Comparable<Game> {
     }
 
     Game flipCols() {
-        Game ans = clone();
+        Game ans = copy();
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                 ans.board[row][COLS - col - 1] = board[row][col];
@@ -242,7 +258,7 @@ public class Game implements Comparable<Game> {
     }
 
     Game flipRowsAndCols() {
-        Game ans = clone();
+        Game ans = copy();
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                 ans.board[ROWS - row - 1][COLS - col - 1] = board[row][col];
@@ -255,7 +271,7 @@ public class Game implements Comparable<Game> {
         if (ROWS != COLS) {
             return null;
         }
-        Game ans = clone();
+        Game ans = copy();
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                 ans.board[col][row] = board[row][col];
@@ -268,7 +284,7 @@ public class Game implements Comparable<Game> {
         if (ROWS != COLS) {
             return null;
         }
-        Game ans = clone();
+        Game ans = copy();
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                 ans.board[col][row] = board[ROWS - row - 1][COLS - col - 1];
@@ -279,7 +295,7 @@ public class Game implements Comparable<Game> {
 
     public Collection<Game> getEquivClass() {
         ArrayList<Game> ans = new ArrayList<Game>();
-        ans.add(clone());
+        ans.add(copy());
         ans.add(flipRows());
         ans.add(flipCols());
         ans.add(flipRowsAndCols());

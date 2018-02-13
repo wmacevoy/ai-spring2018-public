@@ -7,7 +7,6 @@ package tictactoe;
 
 import java.util.Collection;
 import java.util.Random;
-import java.util.TreeMap;
 
 /**
  *
@@ -23,7 +22,7 @@ public class GameCache<Value> {
         capacity = _capacity;
     }
 
-    int getCapacity() {
+    public int getCapacity() {
         return capacity;
     }
 
@@ -32,31 +31,39 @@ public class GameCache<Value> {
             data.clear();
         } else {
             while (data.size() > limit) {
-                int n = rng.nextInt();
+                int n = rng.nextInt(data.size());
                 Game del = data.key(n);
                 data.delete(del);
             }
         }
     }
 
-    void setCapacity(int _capacity) {
+    public void setCapacity(int _capacity) {
         capacity = _capacity;
         fit(capacity);
     }
 
-    void add(Game game, Value value) {
-        fit(capacity - 1);
-        data.put(game, value);
+    public void add(Game game, Value value) {
+        if (capacity > 0) {
+            fit(capacity - 1);
+            data.put(game, value);
+        }
     }
 
-    Value get(Game game) {
-        Collection<Game> games = game.getEquivClass();
-        for (Game equivGame : games) {
-            Value value = data.get(equivGame);
-            if (value != null) {
-                return value;
+    public Value get(Game game) {
+        if (capacity > 0) {
+            Collection<Game> games = game.getEquivClass();
+            for (Game equivGame : games) {
+                Value value = data.get(equivGame);
+                if (value != null) {
+                    return value;
+                }
             }
         }
         return null;
+    }
+
+    public void clear() {
+        data.clear();
     }
 }

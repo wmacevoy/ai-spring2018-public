@@ -13,12 +13,14 @@ import java.util.Random;
  * @author wmacevoy
  */
 public class RandomAgent implements Agent {
+    public RandomAgent(Parameters parameters) {
+        this(Mark.valueOf(parameters.getString("side")));
+    }
     public RandomAgent(Mark side) {}
     Random rng = new Random();
     public Move getMove(Game game) {
         ArrayList<Move> moves = game.getMoves();
         int n = rng.nextInt(moves.size());
         return moves.get(n);
-    }
-    
+    }   
 }
