@@ -24,8 +24,8 @@ public class GoldenSectionMinimizer implements Minimizer {
             throw new IllegalArgumentException("golden section 1d only");
         }
     }
-    public static final double r1 = (Math.sqrt(5.0) - 1) / 2.0;
-    public static final double r2 = r1 * r1;
+    public static final double invphi = (Math.sqrt(5.0) - 1) / 2.0;
+    public static final double invphi2 = invphi * invphi;
 
     double f(double x) {
         problem.setRealParameterValue(0, x);
@@ -40,8 +40,10 @@ public class GoldenSectionMinimizer implements Minimizer {
         double a = Math.min(this.a,this.b);
         double b = Math.max(this.a,this.b);
         double h = b - a;
-        double c = a + r2 * h;
-        double d = a + r1 * h;
+        if (h <= eps) { return f((a+b)/2.0); }
+        int n = (int) (Math.ceil(Math.log(eps/h)/Math.log(invphi)));
+        double c = a + invphi2 * h;
+        double d = a + invphi * h;
         double yc = f(c);
         double yd = f(d);
         double ymin = yd;
@@ -51,7 +53,7 @@ public class GoldenSectionMinimizer implements Minimizer {
                 d = c;
                 yd = yc;
                 h = b - a;
-                c = a + r2 * h;
+                c = a + invphi2 * h;
                 if (h <= eps) {
                     break;
                 }
@@ -62,7 +64,7 @@ public class GoldenSectionMinimizer implements Minimizer {
                 c = d;
                 yc = yd;
                 h = b - a;
-                d = a + r1 * h;
+                d = a + invphi * h;
                 if (h <= eps) {
                     break;
                 }

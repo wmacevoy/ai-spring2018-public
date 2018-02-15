@@ -20,7 +20,7 @@ public class SteepestDescentMinimizer implements Minimizer {
         problem = _problem;
     }
 
-    class SteepestDescentRealMin implements RealMin {
+    class SteepestDescentRealMin implements RealMin { // g(t)
 
         int n = problem.getRealParameterSize();
         double[] x = new double[n];
@@ -127,15 +127,15 @@ public class SteepestDescentMinimizer implements Minimizer {
         for (int i = 0; i < x0.length; ++i) {
             x0[i] = problem.getRealParameterValue(i);
         }
-        SteepestDescentRealMin f1d = new SteepestDescentRealMin();
+        SteepestDescentRealMin g = new SteepestDescentRealMin();
         GoldenSectionMinimizer min1d = new GoldenSectionMinimizer();
         for (;;) {
-            f1d.setup();
-            min1d.setProblem(f1d);
+            g.setup(); // calc grad f at x now to define g(t) = f(x+t*grad f)
+            min1d.setProblem(g);
             min1d.eps = eps;
-            f1d.config(min1d);
+            g.config(min1d); // use g',g'' to estimate [a,b] for min problem
 
-            minimum=min1d.min();
+            minimum=min1d.min(); // find min for g (t star)
             for (int i = 0; i < x0.length; ++i) {
                 x1[i] = problem.getRealParameterValue(i);
             }
