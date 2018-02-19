@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,15 +11,15 @@ import java.util.HashMap;
 /**
  *
  * @author Warren MacEvoy
- * 
- * Silly minimization example based on Dr. Strange movie.
- * Assuming you must have a positive number of jokes and
- * between 0 and 2 fights, maximize the appeal of the movie.
+ *
+ * Silly minimization example based on Dr. Strange movie. Assuming you must have
+ * a positive number of jokes and between 0 and 2 fights, maximize the appeal of
+ * the movie.
  */
 public class DrStrangeRealMin implements RealMin {
 
     double[] values = new double[2];
-    private static final String[] names = new String[]{"joke", "fight"};
+    private static final String[] names = new String[]{"jokes", "fights"};
     private static final HashMap< String, Integer> indexes = new HashMap< String, Integer>();
 
     static {
@@ -27,8 +27,8 @@ public class DrStrangeRealMin implements RealMin {
             indexes.put(names[i], i);
         }
     }
-    public static final int IJOKE = indexes.get("joke");
-    public static final int IFIGHT = indexes.get("fight");
+    public static final int IJOKES = indexes.get("jokes");
+    public static final int IFIGHTS = indexes.get("fights");
 
     @Override
     public int getRealParameterSize() {
@@ -69,26 +69,26 @@ public class DrStrangeRealMin implements RealMin {
 
     @Override
     public double getValue() {
-        double joke = values[IJOKE];
-        double fight = values[IFIGHT];
+        double jokes = values[IJOKES];
+        double fights = values[IFIGHTS];
         double d2 = 0;
         boolean constrained = true;
         if (constrained) {
 
-            if (joke < 0) {
-                d2 += joke * joke;
-                joke = 0;
+            if (jokes < 0) {
+                d2 += jokes * jokes;
+                jokes = 0;
             }
 
-            if (fight < 0) {
-                d2 += fight * fight;
-                fight = 0;
+            if (fights < 0) {
+                d2 += fights * fights;
+                fights = 0;
             }
-            if (fight > 2) {
-                d2 += (fight - 2) * (fight - 2);
-                fight = 2;
+            if (fights > 2) {
+                d2 += (fights - 2) * (fights - 2);
+                fights = 2;
             }
         }
-        return Math.pow(joke + fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
+        return Math.pow(jokes + fights - 6, 2) + Math.pow(fights - 4, 2) + d2;
     }
 }

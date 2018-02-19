@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,30 +14,19 @@ import java.util.HashMap;
 /**
  *
  * @author Warren MacEvoy
- * 
- * Use reflection to create a minimization problem from a class,
- * public double values, arrays and get/set are parameters,
- * and a public get with no set is the value.  Ex:
- * class Ex extends ReflectedRealMin {
- *   public double x;
- *   public double y;
- *   public double [] a = new double[2];
- *   private time;
- *   public double getTime() { return time; }
- *   public void setTime(double value) { time=value; }
- *   private double _money;
- *   public double money() { return _money; }
- *   public void money(double value) { _money=value; }
- *   public double cost() {
- *      return x+y+a[0]+a[1]+getTime()+money();
- *   }
- * }
- * This will be a minimization problem with 6 parameters
- *   "x","y","a[0]","a[1]","time","money"
- * and minimization target of "cost".  Note the indexes
- * are not necessarily in declared order, but will be consistent
- * across all instances of Ex.
- * 
+ *
+ * Use reflection to create a minimization problem from a class, public double
+ * values, arrays and get/set are parameters, and a public get with no set is
+ * the value. Ex: class Ex extends ReflectedRealMin { public double x; public
+ * double y; public double [] a = new double[2]; private time; public double
+ * getTime() { return time; } public void setTime(double value) { time=value; }
+ * private double _money; public double money() { return _money; } public void
+ * money(double value) { _money=value; } public double cost() { return
+ * x+y+a[0]+a[1]+getTime()+money(); } } This will be a minimization problem with
+ * 6 parameters "x","y","a[0]","a[1]","time","money" and minimization target of
+ * "cost". Note the indexes are not necessarily in declared order, but will be
+ * consistent across all instances of Ex.
+ *
  */
 public class ReflectedRealMin extends ReflectedRealParameters implements RealMin {
 

@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 /**
  *
  * @author Warren MacEvoy
- * 
+ *
  * https://en.wikipedia.org/wiki/Golden-section_search
  */
 public class GoldenSectionMinimizer implements Minimizer {
@@ -39,11 +39,13 @@ public class GoldenSectionMinimizer implements Minimizer {
     // optimized to remove unused function evaluations.
     @Override
     public double min() {
-        double a = Math.min(this.a,this.b);
-        double b = Math.max(this.a,this.b);
+        double a = Math.min(this.a, this.b);
+        double b = Math.max(this.a, this.b);
         double h = b - a;
-        if (h <= eps) { return f((a+b)/2.0); }
-        int n = (int) (Math.ceil(Math.log(eps/h)/Math.log(invphi)));
+        if (h <= eps) {
+            return f((a + b) / 2.0);
+        }
+        int n = (int) (Math.ceil(Math.log(eps / h) / Math.log(invphi)));
         double c = a + invphi2 * h;
         double d = a + invphi * h;
         double yc = f(c);

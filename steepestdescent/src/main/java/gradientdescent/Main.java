@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 /**
  *
@@ -12,15 +12,15 @@ package steepestdescent;
 public class Main {
 
     public static void main(String[] args) {
-        
+
         // choose problem to minimize
         RealMin problem = new DrStrangeRealMin();
         int dim = problem.getRealParameterSize();
 
         // choose minimizer
-        SteepestDescentMinimizer minimizer = new SteepestDescentMinimizer();
+        GradientDescentMinimizer minimizer = new GradientDescentMinimizer();
         minimizer.setProblem(problem);
-        
+
         minimizer.min();
 
         for (int i = 0; i < problem.getRealParameterSize(); ++i) {

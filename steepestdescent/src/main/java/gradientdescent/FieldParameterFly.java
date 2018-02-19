@@ -3,35 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 import java.lang.reflect.Field;
 
 /**
  *
  * @author Warren MacEvoy
- * 
- * Flyweight pattern access for double array in object,
- * Used by ReflectedRealParameters to manipulate an
- * object as RealParameters object.
+ *
+ * Manipulate a double field of an object as flyweight.
  */
-public class ArrayParameterFly implements RealParameterFly {
+public class FieldParameterFly implements RealParameterFly {
 
     private Field field;
-    private int index;
 
-    public ArrayParameterFly(Field _field, int _index) {
+    public FieldParameterFly(Field _field) {
         field = _field;
-        index = _index;
     }
 
     public String name() {
-        return field.getName() + "[" + index + "]";
+        return field.getName();
     }
 
     public double get(Object fly) {
         try {
-            return ((double[]) field.get(fly))[index];
+            return field.getDouble(fly);
         } catch (IllegalArgumentException | IllegalAccessException ex) {
             throw new RuntimeException(ex);
         }
@@ -39,8 +35,9 @@ public class ArrayParameterFly implements RealParameterFly {
 
     public void set(Object fly, double value) {
         try {
-            ((double[]) field.get(fly))[index] = value;
+            field.setDouble(fly, value);
         } catch (IllegalArgumentException | IllegalAccessException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }

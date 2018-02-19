@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,8 +33,10 @@ public class ReflectedRealParameters implements RealParameters {
     ArrayList< RealParameterFly> accessors = new ArrayList< RealParameterFly>();
     HashMap< String, Integer> indexes = new HashMap< String, Integer>();
 
-    ReflectedRealParameters() { this(null); }
-    
+    ReflectedRealParameters() {
+        this(null);
+    }
+
     ReflectedRealParameters(Object _object) {
         object = _object != null ? _object : this;
         Field[] fields = object.getClass().getDeclaredFields();
@@ -96,8 +98,8 @@ public class ReflectedRealParameters implements RealParameters {
                 }
             }
         }
-        
-        for (int i=0; i<accessors.size(); ++i) {
+
+        for (int i = 0; i < accessors.size(); ++i) {
             indexes.put(accessors.get(i).name(), i);
         }
     }

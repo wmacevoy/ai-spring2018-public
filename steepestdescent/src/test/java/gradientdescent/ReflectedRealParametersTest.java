@@ -3,10 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,25 +47,6 @@ public class ReflectedRealParametersTest {
         }
     }
 
-    public ReflectedRealParametersTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     /**
      * Test of isPublic method, of class ReflectedRealParameters.
      */
@@ -84,7 +63,7 @@ public class ReflectedRealParametersTest {
     @Test
     public void testIsPublic_Method() throws Exception {
         assertTrue(ReflectedRealParameters.isPublic(BusyBox.class.getDeclaredMethod("getCents")));
-        assertTrue(ReflectedRealParameters.isPublic(BusyBox.class.getDeclaredMethod("setCents",double.class)));
+        assertTrue(ReflectedRealParameters.isPublic(BusyBox.class.getDeclaredMethod("setCents", double.class)));
         assertFalse(ReflectedRealParameters.isPublic(BusyBox.class.getDeclaredMethod("something")));
     }
 

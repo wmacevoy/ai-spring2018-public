@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package steepestdescent;
+package gradientdescent;
 
 /**
  *
- * @author Warren MacEvoy
- * Represent a real-valued minimization problem
+ * @author wmacevoy
  */
-public interface RealMin extends RealParameters {
-    RealMin copy();
-    double getValue();
+public interface Minimizer {
+
+    void setProblem(RealMin problem);
+
+    double min();
+
 }
