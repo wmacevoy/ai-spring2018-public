@@ -8,9 +8,13 @@ package steepestdescent;
 /**
  *
  * @author Warren MacEvoy
- * Represent a real-valued minimization problem
+ * Used by ReflectedRealParameters to create manipulators
+ * for fields in an object to express them as RealParameters.
  */
-public interface RealMin extends RealParameters {
-    RealMin copy();
-    double getValue();
+public interface RealParameterFly {
+    String name();
+
+    double get(Object fly);
+
+    void set(Object fly, double value);
 }

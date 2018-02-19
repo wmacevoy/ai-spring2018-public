@@ -7,7 +7,9 @@ package steepestdescent;
 
 /**
  *
- * @author wmacevoy
+ * @author Warren MacEvoy
+ * 
+ * https://en.wikipedia.org/wiki/Golden-section_search
  */
 public class GoldenSectionMinimizer implements Minimizer {
 

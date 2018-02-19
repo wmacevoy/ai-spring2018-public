@@ -5,75 +5,144 @@
  */
 package steepestdescent;
 
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  *
- * @author wmacevoy
+ * @author Warren MacEvoy
+ * 
+ * Use reflection to create a minimization problem from a class,
+ * public double values, arrays and get/set are parameters,
+ * and a public get with no set is the value.  Ex:
+ * class Ex extends ReflectedRealMin {
+ *   public double x;
+ *   public double y;
+ *   public double [] a = new double[2];
+ *   private time;
+ *   public double getTime() { return time; }
+ *   public void setTime(double value) { time=value; }
+ *   private double _money;
+ *   public double money() { return _money; }
+ *   public void money(double value) { _money=value; }
+ *   public double cost() {
+ *      return x+y+a[0]+a[1]+getTime()+money();
+ *   }
+ * }
+ * This will be a minimization problem with 6 parameters
+ *   "x","y","a[0]","a[1]","time","money"
+ * and minimization target of "cost".  Note the indexes
+ * are not necessarily in declared order, but will be consistent
+ * across all instances of Ex.
+ * 
  */
-public class DrStrangeRealMin implements RealMin {
-    double[] values = new double[2];
-    private static final String[] names = new String[] { "joke", "fight" };
-    private static final HashMap < String, Integer > indexes = new HashMap < String, Integer > ();
-    static {
-        for (int i=0; i<names.length; ++i) {
-            indexes.put(names[i],i);
+public class ReflectedRealMin extends ReflectedRealParameters implements RealMin {
+
+    Method getValueMethod;
+
+    ReflectedRealMin() {
+        this(null);
+    }
+
+    ReflectedRealMin(Object _object) {
+        super(_object);
+        Method[] methods = object.getClass().getDeclaredMethods();
+        HashMap<String, Method> gets = new HashMap<String, Method>();
+        HashMap<String, Method> sets = new HashMap<String, Method>();
+
+        for (Method method : methods) {
+            if (isPublic(method)
+                    && method.getParameterCount() == 0
+                    && isDouble(method.getReturnType())) {
+                gets.put(method.getName(), method);
+            }
+            if (isPublic(method)
+                    && method.getParameterCount() == 1
+                    && isDouble(method.getParameterTypes()[0])) {
+                sets.put(method.getName(), method);
+            }
         }
-    }
-    public static final int IJOKE = indexes.get("joke");
-    public static final int IFIGHT = indexes.get("fight");
 
-    @Override
-    public int getRealParameterSize() {
-        return names.length;
-    }
+        ArrayList<Method> mins = new ArrayList<Method>();
+        for (String name : gets.keySet()) {
+            if (name.startsWith("get")) {
+                String Root = name.substring(3);
+                Method setter = sets.get("set" + Root);
+                if (setter == null) {
+                    Method getter = gets.get("get" + Root);
+                    mins.add(getter);
+                }
+            } else {
+                String root = name;
+                Method setter = sets.get(name);
+                if (setter == null) {
+                    Method getter = gets.get(name);
+                    mins.add(getter);
+                }
+            }
+        }
 
-    @Override
-    public String getRealParameterName(int i) { return names[i]; }
-
-    @Override
-    public int getRealParameterIndex(String name) { return indexes.get(name); }
-    
-
-    @Override
-    public double getRealParameterValue(int index) {
-        return values[index];
-    }
-
-    @Override
-    public void setRealParameterValue(int index, double value) {
-        values[index] = value;
-    }
-    public DrStrangeRealMin() {
-    }
-
-    public DrStrangeRealMin(DrStrangeRealMin copy) {
-        System.arraycopy(copy.values, 0, copy.values, 0, values.length);
-    }
-
-    @Override
-    public RealMin copy() {
-        return new DrStrangeRealMin(this);
+        getValueMethod = null;
+        for (Method method : mins) {
+            if (method.getName().equals("getValue")) {
+                getValueMethod = method;
+                break;
+            }
+        }
+        if (getValueMethod == null) {
+            if (mins.size() == 0) {
+                throw new IllegalArgumentException("no min target method found");
+            } else if (mins.size() == 1) {
+                getValueMethod = mins.get(0);
+            } else {
+                String names = "";
+                for (int i = 0; i < mins.size(); ++i) {
+                    if (i > 0) {
+                        names = names + ",";
+                    }
+                    names = names + mins.get(i).getName();
+                }
+                throw new IllegalArgumentException("ambiguous, change one of " + names + " to getValue");
+            }
+        }
     }
 
     @Override
     public double getValue() {
-        double d2=0;
-        double joke = values[IJOKE];
-        if (joke < 0) {
-            d2 += joke*joke;
-            joke = 0;
+        try {
+            return (double) getValueMethod.invoke(object);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new IllegalStateException();
         }
-        double fight = values[IFIGHT];
-        if (fight < 0) {
-            d2 += fight*fight;
-            fight = 0;
+    }
+
+    @Override
+    public RealMin copy() {
+        Class clazz = object.getClass();
+        RealMin ans = null;
+        Constructor cons = null;
+        try {
+            try {
+                cons = clazz.getDeclaredConstructor(clazz);
+                ans = (RealMin) cons.newInstance(this);
+            } catch (NoSuchMethodException ex) {
+                try {
+                    cons = clazz.getDeclaredConstructor();
+                    ans = (RealMin) cons.newInstance();
+                } catch (NoSuchMethodException | SecurityException ex1) {
+                    throw new IllegalStateException(ex1);
+                }
+                int n = ans.getRealParameterSize();
+                for (int i = 0; i < n; ++i) {
+                    ans.setRealParameterValue(i, getRealParameterValue(i));
+                }
+            }
+        } catch (SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            throw new IllegalStateException(ex);
         }
-        if (fight > 2) {
-            d2 += (fight-2)*(fight-2);
-            fight = 2;
-        }
-        return Math.pow(joke+fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
+        return ans;
     }
 }

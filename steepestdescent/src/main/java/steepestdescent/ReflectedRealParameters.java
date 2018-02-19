@@ -5,75 +5,125 @@
  */
 package steepestdescent;
 
-import java.util.Arrays;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  *
  * @author wmacevoy
  */
-public class DrStrangeRealMin implements RealMin {
-    double[] values = new double[2];
-    private static final String[] names = new String[] { "joke", "fight" };
-    private static final HashMap < String, Integer > indexes = new HashMap < String, Integer > ();
-    static {
-        for (int i=0; i<names.length; ++i) {
-            indexes.put(names[i],i);
+public class ReflectedRealParameters implements RealParameters {
+
+    public static boolean isPublic(Field ao) {
+        return Modifier.isPublic(ao.getModifiers());
+    }
+
+    public static boolean isPublic(Method ao) {
+        return Modifier.isPublic(ao.getModifiers());
+    }
+
+    public static boolean isDouble(Class clazz) {
+        return clazz.equals(double.class);
+    }
+
+    Object object;
+    ArrayList< RealParameterFly> accessors = new ArrayList< RealParameterFly>();
+    HashMap< String, Integer> indexes = new HashMap< String, Integer>();
+
+    ReflectedRealParameters() { this(null); }
+    
+    ReflectedRealParameters(Object _object) {
+        object = _object != null ? _object : this;
+        Field[] fields = object.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (!isPublic(field)) {
+                continue;
+            }
+            Class clazz = field.getType();
+            if (isDouble(clazz)) {
+                accessors.add(new FieldParameterFly(field));
+            }
+            if (clazz.equals(double[].class)) {
+                double[] a = null;
+                try {
+                    a = (double[]) field.get(object);
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (a != null) {
+                    for (int i = 0; i < a.length; ++i) {
+                        accessors.add(new ArrayParameterFly(field, i));
+                    }
+                }
+            }
+        }
+
+        Method[] methods = object.getClass().getDeclaredMethods();
+        HashMap<String, Method> gets = new HashMap<String, Method>();
+        HashMap<String, Method> sets = new HashMap<String, Method>();
+
+        for (Method method : methods) {
+            if (isPublic(method)
+                    && method.getParameterCount() == 0
+                    && isDouble(method.getReturnType())) {
+                gets.put(method.getName(), method);
+            }
+            if (isPublic(method)
+                    && method.getParameterCount() == 1
+                    && isDouble(method.getParameterTypes()[0])) {
+                sets.put(method.getName(), method);
+            }
+        }
+
+        for (String name : gets.keySet()) {
+            if (name.startsWith("get")) {
+                String Root = name.substring(3);
+                Method setter = sets.get("set" + Root);
+                if (setter != null) {
+                    Method getter = gets.get("get" + Root);
+                    String root = Root.substring(0, 1).toLowerCase() + Root.substring(1);
+                    accessors.add(new MethodParameterFly(root, getter, setter));
+                }
+            } else {
+                String root = name;
+                Method setter = sets.get(name);
+                if (setter != null) {
+                    Method getter = gets.get(name);
+                    accessors.add(new MethodParameterFly(root, getter, setter));
+                }
+            }
+        }
+        
+        for (int i=0; i<accessors.size(); ++i) {
+            indexes.put(accessors.get(i).name(), i);
         }
     }
-    public static final int IJOKE = indexes.get("joke");
-    public static final int IFIGHT = indexes.get("fight");
 
     @Override
     public int getRealParameterSize() {
-        return names.length;
+        return accessors.size();
     }
 
     @Override
-    public String getRealParameterName(int i) { return names[i]; }
+    public String getRealParameterName(int index) {
+        return accessors.get(index).name();
+    }
 
     @Override
-    public int getRealParameterIndex(String name) { return indexes.get(name); }
-    
+    public int getRealParameterIndex(String name) {
+        return indexes.get(name);
+    }
 
     @Override
     public double getRealParameterValue(int index) {
-        return values[index];
+        return accessors.get(index).get(object);
     }
 
     @Override
     public void setRealParameterValue(int index, double value) {
-        values[index] = value;
-    }
-    public DrStrangeRealMin() {
-    }
-
-    public DrStrangeRealMin(DrStrangeRealMin copy) {
-        System.arraycopy(copy.values, 0, copy.values, 0, values.length);
-    }
-
-    @Override
-    public RealMin copy() {
-        return new DrStrangeRealMin(this);
-    }
-
-    @Override
-    public double getValue() {
-        double d2=0;
-        double joke = values[IJOKE];
-        if (joke < 0) {
-            d2 += joke*joke;
-            joke = 0;
-        }
-        double fight = values[IFIGHT];
-        if (fight < 0) {
-            d2 += fight*fight;
-            fight = 0;
-        }
-        if (fight > 2) {
-            d2 += (fight-2)*(fight-2);
-            fight = 2;
-        }
-        return Math.pow(joke+fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
+        accessors.get(index).set(object, value);
     }
 }

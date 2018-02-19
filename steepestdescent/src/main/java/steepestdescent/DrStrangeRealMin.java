@@ -10,15 +10,21 @@ import java.util.HashMap;
 
 /**
  *
- * @author wmacevoy
+ * @author Warren MacEvoy
+ * 
+ * Silly minimization example based on Dr. Strange movie.
+ * Assuming you must have a positive number of jokes and
+ * between 0 and 2 fights, maximize the appeal of the movie.
  */
 public class DrStrangeRealMin implements RealMin {
+
     double[] values = new double[2];
-    private static final String[] names = new String[] { "joke", "fight" };
-    private static final HashMap < String, Integer > indexes = new HashMap < String, Integer > ();
+    private static final String[] names = new String[]{"joke", "fight"};
+    private static final HashMap< String, Integer> indexes = new HashMap< String, Integer>();
+
     static {
-        for (int i=0; i<names.length; ++i) {
-            indexes.put(names[i],i);
+        for (int i = 0; i < names.length; ++i) {
+            indexes.put(names[i], i);
         }
     }
     public static final int IJOKE = indexes.get("joke");
@@ -30,11 +36,14 @@ public class DrStrangeRealMin implements RealMin {
     }
 
     @Override
-    public String getRealParameterName(int i) { return names[i]; }
+    public String getRealParameterName(int i) {
+        return names[i];
+    }
 
     @Override
-    public int getRealParameterIndex(String name) { return indexes.get(name); }
-    
+    public int getRealParameterIndex(String name) {
+        return indexes.get(name);
+    }
 
     @Override
     public double getRealParameterValue(int index) {
@@ -45,6 +54,7 @@ public class DrStrangeRealMin implements RealMin {
     public void setRealParameterValue(int index, double value) {
         values[index] = value;
     }
+
     public DrStrangeRealMin() {
     }
 
@@ -59,21 +69,26 @@ public class DrStrangeRealMin implements RealMin {
 
     @Override
     public double getValue() {
-        double d2=0;
         double joke = values[IJOKE];
-        if (joke < 0) {
-            d2 += joke*joke;
-            joke = 0;
-        }
         double fight = values[IFIGHT];
-        if (fight < 0) {
-            d2 += fight*fight;
-            fight = 0;
+        double d2 = 0;
+        boolean constrained = true;
+        if (constrained) {
+
+            if (joke < 0) {
+                d2 += joke * joke;
+                joke = 0;
+            }
+
+            if (fight < 0) {
+                d2 += fight * fight;
+                fight = 0;
+            }
+            if (fight > 2) {
+                d2 += (fight - 2) * (fight - 2);
+                fight = 2;
+            }
         }
-        if (fight > 2) {
-            d2 += (fight-2)*(fight-2);
-            fight = 2;
-        }
-        return Math.pow(joke+fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
+        return Math.pow(joke + fight - 6, 2) + Math.pow(fight - 4, 2) + d2;
     }
 }

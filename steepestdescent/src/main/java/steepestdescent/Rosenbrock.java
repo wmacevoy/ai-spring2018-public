@@ -10,10 +10,12 @@ import static java.lang.Math.*;
 
 /**
  *
- * @author warren
+ * @author Warren MacEvoy
+ * https://en.wikipedia.org/wiki/Rosenbrock_function
+ * 
  */
 public class Rosenbrock implements RealMin {
-        double[] values = new double[2];
+    private double[] values = new double[2];
     private static final String[] names = new String[] { "x", "y" };
     private static final HashMap < String, Integer > indexes = new HashMap < String, Integer > ();
     static {
@@ -59,7 +61,7 @@ public class Rosenbrock implements RealMin {
 
     @Override
     public double getValue() {
-        double x = values[IX]-1;
+        double x = values[IX];
         double y = values[IY];
         return pow(1-x,2)+100*pow((y-pow(x,2)),2);
     }
