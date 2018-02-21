@@ -13,7 +13,9 @@ import java.util.Arrays;
  */
 public class GradientDescentMinimizer implements Minimizer {
 
-    double eps = 1e-6;
+    private double eps = 1e-6;
+    public double getEps() { return eps; }
+    public void setEps(double value) { eps = value; }
 
     RealMin problem;
 

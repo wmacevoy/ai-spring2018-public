@@ -32,11 +32,11 @@ public class ReflectedRealMin extends ReflectedRealParameters implements RealMin
 
     Method getValueMethod;
 
-    ReflectedRealMin() {
+    public ReflectedRealMin() {
         this(null);
     }
 
-    ReflectedRealMin(Object _object) {
+    public ReflectedRealMin(Object _object) {
         super(_object);
         Method[] methods = object.getClass().getDeclaredMethods();
         HashMap<String, Method> gets = new HashMap<String, Method>();

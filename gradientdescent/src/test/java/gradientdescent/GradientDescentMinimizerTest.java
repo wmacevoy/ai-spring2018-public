@@ -20,10 +20,10 @@ public class GradientDescentMinimizerTest {
         Rosenbrock f = new Rosenbrock();
         GradientDescentMinimizer instance = new GradientDescentMinimizer();
         instance.setProblem(f);
-        instance.eps = 1e-6;
+        instance.setEps(1e-6);
         instance.min();
         double[] x = f.getRealParameters(null);
-        assertArrayEquals(new double[]{1, 1}, x, Math.sqrt(instance.eps));
+        assertArrayEquals(new double[]{1, 1}, x, Math.sqrt(instance.getEps()));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class GradientDescentMinimizerTest {
 
         GradientDescentMinimizer instance = new GradientDescentMinimizer();
 
-        instance.eps = 1e-6;
+        instance.setEps(1e-6);
         double[] x = new double[]{0, 0};
         f.setRealParameters(x);
         instance.setProblem(f);
