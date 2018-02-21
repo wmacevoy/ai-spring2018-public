@@ -30,4 +30,4 @@ cd /usr/local
 sudo ln -s apache-maven-3.5.2 apache-maven
 cd bin
 sudo ln -s mvn ../apache-maven-$VER/bin/mvn mvn
-```
+````
