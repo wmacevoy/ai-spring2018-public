@@ -10,10 +10,24 @@ sudo apt install oracle-java9-installer
 sudo apt install oracle-java9-set-default
 javac -version
 3. Install maven:
-sudo apt-install gnupg
+
+````bash
+sudo apt install gnupg
 VER=3.5.2
 MAJOR=${VER%%.*}
-curl -o maven-$VER-bin.tar.gz http://mirrors.koehn.com/apache/maven/maven-$MAJOR/$VER/binaries/apache-maven-$VER-bin.tar.gz
-curl -o maven-$VER.tar.gz.asc https://www.apache.org/dist/maven/maven-$MAJOR/$VER/binaries/apache-maven-$VER-bin.tar.gz.asc
-
-
+FILE=apache-maven-$VER-bin.tar.gz
+curl -o $FILE http://mirrors.koehn.com/apache/maven/maven-$MAJOR/$VER/binaries/$FILE
+curl -o $FILE.asc https://www.apache.org/dist/maven/maven-$MAJOR/$VER/binaries/$FILE.asc
+curl -o $FILE.keys https://www.apache.org/dist/maven/KEYS
+gpg --import $FILE.keys
+if ! gpg --verify $FILE.asc
+then
+   echo "corrupted file $FILE"
+   exit 1
+fi
+sudo tar -C /usr/local -xf $FILE
+cd /usr/local
+sudo ln -s apache-maven-3.5.2 apache-maven
+cd bin
+sudo ln -s mvn ../apache-maven-$VER/bin/mvn mvn
+```
