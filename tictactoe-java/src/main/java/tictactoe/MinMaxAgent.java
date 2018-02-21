@@ -17,16 +17,25 @@ public class MinMaxAgent implements Agent {
     Mark side;
     int maxDepth = Integer.MAX_VALUE;
     int cacheCapacity;
+    double heuristicMyTurn;
+    double heuristicOtherTurn;
     GameCache<Double> cache;
 
     public MinMaxAgent(Parameters parameters) {
         this(Mark.valueOf(parameters.getString("side")),
+                parameters.getDouble("heuristicMyTurn",-0.25),
+                parameters.getDouble("heuristicOtherTurn",-0.50),
                 (int) parameters.getLong("maxDepth", Integer.MAX_VALUE),
                 (int) parameters.getLong("cacheCapacity", 0));
     }
 
-    public MinMaxAgent(Mark _side, int _maxDepth, int _cacheCapacity) {
+    public MinMaxAgent(Mark _side, 
+            double _heuristicMyTurn,
+            double _heuristicOtherTurn,
+            int _maxDepth, int _cacheCapacity) {
         side = _side;
+        heuristicMyTurn=_heuristicMyTurn;
+        heuristicOtherTurn=_heuristicOtherTurn;
         maxDepth = _maxDepth;
         cacheCapacity = _cacheCapacity;
         cache = new GameCache<Double>(cacheCapacity);
@@ -45,7 +54,7 @@ public class MinMaxAgent implements Agent {
     }
 
     double getHeuristicValue(Game game) {
-        return (side == game.turn()) ? -0.25 : -0.50;
+        return (side == game.turn()) ? heuristicMyTurn : heuristicOtherTurn;
     }
 
     double getMinValue(Game game, int depth) {

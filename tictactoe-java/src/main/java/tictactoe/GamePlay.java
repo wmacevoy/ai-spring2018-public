@@ -39,7 +39,6 @@ public class GamePlay {
         Parameters my = Parameters.make(parameters.getParameters(side.name()))
                 .set("side", side.name()).parameters();
         Agent agent = Agent.make(my).agent();
-        System.out.println("agent " + side.name() + "=" + agent.getClass());
         return agent;
     }
 

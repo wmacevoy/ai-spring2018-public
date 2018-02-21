@@ -27,35 +27,40 @@ public class Parameters {
 
         private Parameters values;
 
-        Builder() {
+        public Builder() {
             values = new Parameters();
         }
 
-        Builder(Parameters _values) {
+        public Builder(Parameters _values) {
             values = new Parameters(_values);
         }
 
-        Builder set(String name, boolean value) {
+        public Builder set(String name, boolean value) {
             values.setBoolean(name, value);
             return this;
         }
 
-        Builder set(String name, long value) {
+        public Builder set(String name, long value) {
             values.setLong(name, value);
             return this;
         }
 
-        Builder set(String name, String value) {
+        public Builder set(String name, double value) {
+            values.setDouble(name, value);
+            return this;
+        }
+
+        public Builder set(String name, String value) {
             values.setString(name, value);
             return this;
         }
 
-        Builder set(String name, Parameters value) {
+        public Builder set(String name, Parameters value) {
             values.setParameters(name, value);
             return this;
         }
         
-        Parameters parameters() {
+        public Parameters parameters() {
             return values;
         }
     }

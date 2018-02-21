@@ -14,8 +14,8 @@ import java.util.Collection;
  */
 public class Game implements Comparable<Game> {
 
-    public static final int ROWS = 5;
-    public static final int COLS = 5;
+    public static final int ROWS = 4;
+    public static final int COLS = 4;
     public static final int WIN_LENGTH = 4;
 
     private Mark[][] board = new Mark[ROWS][COLS];
