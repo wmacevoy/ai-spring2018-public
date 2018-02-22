@@ -104,7 +104,7 @@ public class ReflectedRealMin extends ReflectedRealParameters implements RealMin
         try {
             return (double) getValueMethod.invoke(object);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            throw new IllegalStateException();
+            throw new IllegalStateException(ex);
         }
     }
 
