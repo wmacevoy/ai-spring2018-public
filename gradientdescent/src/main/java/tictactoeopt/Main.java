@@ -7,10 +7,13 @@ package tictactoeopt;
 
 import gradientdescent.DrStrangeRealMin;
 import gradientdescent.GradientDescentMinimizer;
+import gradientdescent.Minimizer;
 import gradientdescent.RealMin;
 import gradientdescent.ReflectedRealMin;
+import gradientdescent.SampleMinimizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tictactoe.Game;
 import tictactoe.GamePlay;
 import tictactoe.Parameters;
 import tictactoe.State;
@@ -50,7 +53,9 @@ public class Main {
 		.parameters();
 
 	    Parameters min = Parameters.make()
-		.set("class","gradientdescent.GradientDescentMinimizer")
+//		.set("class","gradientdescent.GradientDescentMinimizer")
+		.set("class","gradientdescent.SampleMinimizer")
+                    
 		.set("eps",0.05)
 		.parameters();
 	    
@@ -96,7 +101,7 @@ public class Main {
 		xmaxs[iOther] =  1;
 		dxs[iOther] = min.getDouble("eps");
 
-		sm.setBox(xmin,dxs,xmax);
+		sm.setBox(xmins,dxs,xmaxs);
 		minimizer = sm;
 	    } else {
 		throw new IllegalArgumentException("unknown minimizer " + min.getString("class"));
@@ -110,7 +115,7 @@ public class Main {
     }
 
     void go() {
-	minimizer().getProblem(problem());
+	minimizer().setProblem(problem());
 	minimizer().min();
 
         for (int i = 0; i < problem().getRealParameterSize(); ++i) {
