@@ -13,6 +13,7 @@ javac -version
 
 ````bash
 sudo apt install gnupg
+cd ~/Downloads
 VER=3.5.2
 MAJOR=${VER%%.*}
 FILE=apache-maven-$VER-bin.tar.gz
@@ -26,8 +27,32 @@ then
    exit 1
 fi
 sudo tar -C /usr/local -xf $FILE
-cd /usr/local
-sudo ln -s apache-maven-3.5.2 apache-maven
-cd bin
-sudo ln -s mvn ../apache-maven-$VER/bin/mvn mvn
+cd /usr/local/bin
+sudo ln -s ../apache-maven-$VER/bin/mvn mvn
+````
+
+3. Get project files
+
+````bash
+PROJECT=ai-spring2018-public
+PROJECT_DIR=$HOME/projects/$PROJECT
+
+mkdir -p $(basename $PROJECT_DIR)
+cd $(basename $PROJECT_DIR)
+git clone git@github.com:wmacevoy/$PROJECT.git
+````
+
+4. Compile parts
+
+````bash
+PROJECT=ai-spring2018-public
+PROJECT_DIR=$HOME/projects/$PROJECT
+cd $PROJECT_DIR/tictactoe-java
+mvn compile
+mvn test
+mvn install
+cd $PROJECT_DIR/gradientdescent
+mvn compile
+mvn test
+mvn exec:java -Dexec.mainClass=tictactoeopt.OptMinMaxAgent
 ````
