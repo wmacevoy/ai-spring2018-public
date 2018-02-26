@@ -102,6 +102,7 @@ public class TicTacToeGame implements Game {
         throw new IllegalStateException();
     }
 
+    @Override
     public void reset() {
         for (int row = 0; row < rows; ++row) {
             for (int col = 0; col < cols; ++col) {

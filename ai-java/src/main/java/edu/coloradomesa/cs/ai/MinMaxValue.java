@@ -138,7 +138,9 @@ public class MinMaxValue implements Function<Game, Double> {
 
     Pair<Double, Integer> getValue(Game game, int depth) {
         Pair<Double, Integer> valueCertainty = cache.get(game);
-        if (valueCertainty != null && valueCertainty.second >= depth) {
+        if (valueCertainty != null
+                && (maxDepth == Integer.MAX_VALUE
+                || valueCertainty.second >= maxDepth - depth)) {
 //            System.out.println("cached value of " + game + " = " + value);
             return valueCertainty;
         }
