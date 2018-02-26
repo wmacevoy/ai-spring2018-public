@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tictactoe;
+package edu.coloradomesa.cs.ai;
 
 /**
  *
  * @author wmacevoy
  */
-public interface Evaluate {
-    double getValue(Game game);
+public interface Function<X,Y> {
+    Y of(X x);
 }

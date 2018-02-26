@@ -3,22 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tictactoe;
+package edu.coloradomesa.cs.ai;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
  *
  * @author wmacevoy
  */
-public class GameCache<Value> {
+public class RandomCache<X extends Comparable<X>, Y> {
 
-    private int capacity;
-    private Random rng = new Random();
-    private RedBlackBST<Game, Value> data = new RedBlackBST<Game, Value>();
+    protected int capacity;
+    protected Random rng = new Random();
+    protected RedBlackBST<X, Y> data = new RedBlackBST<X, Y>();
 
-    public GameCache(int _capacity) {
+    public RandomCache(int _capacity) {
         capacity = _capacity;
     }
 
@@ -32,7 +33,7 @@ public class GameCache<Value> {
         } else {
             while (data.size() > limit) {
                 int n = rng.nextInt(data.size());
-                Game del = data.key(n);
+                X del = data.key(n);
                 data.delete(del);
             }
         }
@@ -43,22 +44,19 @@ public class GameCache<Value> {
         fit(capacity);
     }
 
-    public void add(Game game, Value value) {
+    public void add(X x, Y y) {
         if (capacity > 0) {
             fit(capacity - 1);
-            data.put(game, value);
+            data.put(x, y);
         }
     }
 
-    public Value get(Game game) {
+    public Y get(X x) {
         if (capacity > 0) {
-            Collection<Game> games = game.getEquivClass();
-            for (Game equivGame : games) {
-                Value value = data.get(equivGame);
-                if (value != null) {
-                    return value;
+                Y y = data.get(x);
+                if (y != null) {
+                    return y;
                 }
-            }
         }
         return null;
     }

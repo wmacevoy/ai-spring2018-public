@@ -3,15 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tictactoe;
+package edu.coloradomesa.cs.ai.tictactoe;
+
+import edu.coloradomesa.cs.ai.Game;
+import edu.coloradomesa.cs.ai.Move;
 
 /**
  *
  * @author wmacevoy
  */
-public class Move {
+public class TicTacToeMove implements Move {
 
-    public Move(Mark _mark, int _row, int _col) {
+    public TicTacToeMove(Mark _mark, int _row, int _col) {
         row = _row;
         col = _col;
         mark = _mark;
@@ -55,15 +58,17 @@ public class Move {
         }
         row = str.charAt(i) - 'a';
         col = str.charAt(i + 1) - '1';
-        return new Move(mark, row, col);
+        return new TicTacToeMove(mark, row, col);
     }
 
+    @Override
     public void play(Game game) {
-        game.move(row, col, mark);
+        ((TicTacToeGame) game).move(row,col,mark);
     }
 
+    @Override
     public void unplay(Game game) {
-        game.unmove(row, col);
+        ((TicTacToeGame) game).unmove(row,col);
     }
 
 }
