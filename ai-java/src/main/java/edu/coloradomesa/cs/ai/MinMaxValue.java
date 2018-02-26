@@ -17,7 +17,7 @@ public class MinMaxValue implements Function<Game, Double> {
     Parameters parameters;
     int player;
     int maxDepth;
-    RandomEquivalenceCache<Game, Double> cache;
+    RandomEquivalenceCache<Game, Pair<Double, Integer>> cache;
 
     public MinMaxValue(Parameters _parameters) {
         parameters = _parameters;
@@ -31,7 +31,7 @@ public class MinMaxValue implements Function<Game, Double> {
                 .def("myTurn", 0.0)
                 .def("otherTurn", 0.0)
                 .set("player", player).parameters(), Function.class);
-        cache = new RandomEquivalenceCache<Game, Double>(parameters.getInt("capacity", 0));
+        cache = new RandomEquivalenceCache<Game, Pair<Double, Integer>>(parameters.getInt("capacity", 0));
     }
 
     Function<Game, Double> leafValue;
@@ -40,7 +40,7 @@ public class MinMaxValue implements Function<Game, Double> {
     Double MIN_AGENT_VALUE = Double.valueOf(-1.0);
     Double MAX_AGENT_VALUE = Double.valueOf(1.0);
 
-    Double getMinValue(Game game, int depth) {
+    Pair<Double, Integer> getMinValue(Game game, int depth) {
         Collection<Move> moves = game.getMoves();
 
         ArrayList<Pair<Move, Double>> valuedMoves = new ArrayList<Pair<Move, Double>>(moves.size());
@@ -52,16 +52,24 @@ public class MinMaxValue implements Function<Game, Double> {
         }
         valuedMoves.sort((a, b) -> -a.second.compareTo(b.second));
         Double value = Double.valueOf(Double.MAX_VALUE);
+        int certainty = 0;
         for (Pair<Move, Double> moveValue : valuedMoves) {
             Move move = moveValue.first;
             try {
                 move.play(game);
-                Double childValue = getValue(game, depth + 1);
-                if (childValue.compareTo(value) < 0) {
-                    value = childValue;
+                Pair<Double, Integer> childValueCertainty = getValue(game, depth + 1);
+                int cmp = childValueCertainty.first.compareTo(value);
+                if (cmp < 0) {
+                    value = childValueCertainty.first;
+                    certainty = childValueCertainty.second + 1;
                     if (value.compareTo(MIN_AGENT_VALUE) <= 0) {
                         value = MIN_AGENT_VALUE;
                         break;
+                    }
+
+                } else if (cmp == 0) {
+                    if (childValueCertainty.second >= certainty) {
+                        certainty = childValueCertainty.second + 1;
                     }
                 }
 
@@ -70,11 +78,11 @@ public class MinMaxValue implements Function<Game, Double> {
             }
         }
 
-        return value;
+        return new Pair<Double, Integer>(value, certainty);
 
     }
 
-    Double getMaxValue(Game game, int depth) {
+    Pair<Double, Integer> getMaxValue(Game game, int depth) {
         Collection<Move> moves = game.getMoves();
 
         ArrayList<Pair<Move, Double>> valuedMoves = new ArrayList<Pair<Move, Double>>(moves.size());
@@ -86,33 +94,39 @@ public class MinMaxValue implements Function<Game, Double> {
         }
         valuedMoves.sort((a, b) -> a.second.compareTo(b.second));
         Double value = Double.valueOf(-Double.MAX_VALUE);
+        int certainty = 0;
         for (Pair<Move, Double> moveValue : valuedMoves) {
             Move move = moveValue.first;
             try {
                 move.play(game);
-                Double childValue = getValue(game, depth + 1);
-                if (childValue.compareTo(value) > 0) {
-                    value = childValue;
+                Pair<Double, Integer> childValueCertainty = getValue(game, depth + 1);
+                int cmp = childValueCertainty.first.compareTo(value);
+                if (cmp > 0) {
+                    value = childValueCertainty.first;
+                    certainty = childValueCertainty.second + 1;
                     if (value.compareTo(MAX_AGENT_VALUE) >= 0) {
                         value = MAX_AGENT_VALUE;
                         break;
                     }
+                } else if (cmp == 0) {
+                    if (childValueCertainty.second >= certainty) {
+                        certainty = childValueCertainty.second + 1;
+                    }
                 }
-
             } finally {
                 move.unplay(game);
             }
         }
 
-        return value;
+        return new Pair<Double, Integer>(value, certainty);
 
     }
 
-    Double getUncachedValue(Game game, int depth) {
+    Pair<Double, Integer> getUncachedValue(Game game, int depth) {
         if (game.over()) {
-            return leafValue.of(game);
+            return new Pair<Double, Integer>(leafValue.of(game), Integer.MAX_VALUE / 2);
         } else if (depth >= maxDepth) {
-            return heuristicValue.of(game);
+            return new Pair<Double, Integer>(heuristicValue.of(game), 0);
         } else {
             if (game.turn() == player) {
                 return getMaxValue(game, depth);
@@ -122,20 +136,21 @@ public class MinMaxValue implements Function<Game, Double> {
         }
     }
 
-    Double getValue(Game game, int depth) {
-        Double value = cache.get(game);
-        if (value != null) {
+    Pair<Double, Integer> getValue(Game game, int depth) {
+        Pair<Double, Integer> valueCertainty = cache.get(game);
+        if (valueCertainty != null && valueCertainty.second >= depth) {
 //            System.out.println("cached value of " + game + " = " + value);
-            return value;
+            return valueCertainty;
         }
-        value = getUncachedValue(game, depth);
-        cache.add(game.copy(), value);
+        valueCertainty = getUncachedValue(game, depth);
+
+        cache.add(game.copy(), valueCertainty);
 //            System.out.println("uncached value of " + game + " = " + value);
-        return value;
+        return valueCertainty;
     }
 
     @Override
     public Double of(Game game) {
-        return getValue(game, 0);
+        return getValue(game, 0).first;
     }
 }
