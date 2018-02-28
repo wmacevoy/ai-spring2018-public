@@ -35,7 +35,14 @@ public class Parameters implements Comparable<Parameters> {
     public static Builder make(Parameters start) {
         return new Builder(start);
     }
-    
+
+    public static Builder make(String json) {
+        Parse parse = new Parse();
+        Builder builder = new Builder();
+        builder.parameters = parse.parse(json);
+        return builder;
+    }
+
     @Override
     public boolean equals(Object to) {
         if (to instanceof Parameters) {
@@ -157,6 +164,18 @@ public class Parameters implements Comparable<Parameters> {
             return this;
         }
 
+        public Builder set(String name, float value) {
+            parameters.setFloat(name, value);
+            return this;
+        }
+
+        public Builder def(String name, float value) {
+            if (!parameters.defined(name)) {
+                set(name, value);
+            }
+            return this;
+        }
+
         public Builder set(String name, double value) {
             parameters.setDouble(name, value);
             return this;
@@ -247,6 +266,11 @@ public class Parameters implements Comparable<Parameters> {
     public static interface LongExpression {
 
         long eval();
+    }
+
+    public static interface FloatExpression {
+
+        float eval();
     }
 
     public static interface DoubleExpression {
@@ -400,12 +424,40 @@ public class Parameters implements Comparable<Parameters> {
         return value != null ? value.longValue() : ex.eval();
     }
 
+    private void setFloat(String name, float value) {
+        long lvalue = (long) value;
+        if (lvalue == value) {
+            setLong(name, lvalue);
+        } else {
+            values.put(name, Float.valueOf(value));
+        }
+    }
+
+    public float getFloat(String name) {
+        return ((Number) values.get(name)).floatValue();
+    }
+
+    public float getFloat(String name, float def) {
+        Number value = (Number) values.get(name);
+        return value != null ? value.floatValue() : def;
+    }
+
+    public float getFloat(String name, FloatExpression ex) {
+        Number value = (Number) values.get(name);
+        return value != null ? value.floatValue() : ex.eval();
+    }
+
     private void setDouble(String name, double value) {
         long lvalue = (long) value;
         if (lvalue == value) {
             setLong(name, lvalue);
         } else {
-            values.put(name, Double.valueOf(value));
+            float fvalue = (float) value;
+            if (fvalue == value) {
+                setFloat(name, fvalue);
+            } else {
+                values.put(name, Double.valueOf(value));
+            }
         }
     }
 
@@ -438,8 +490,8 @@ public class Parameters implements Comparable<Parameters> {
         if (value instanceof BigDecimal) {
             return ((BigDecimal) value).toBigInteger();
         }
-        if (value instanceof Double) {
-            return BigDecimal.valueOf((Double) value).toBigInteger();
+        if (value instanceof Double || value instanceof Float) {
+            return BigDecimal.valueOf(((Number) value).doubleValue()).toBigInteger();
         }
         return BigInteger.valueOf(((Number) value).longValue());
 
@@ -466,18 +518,22 @@ public class Parameters implements Comparable<Parameters> {
         if (value instanceof BigInteger) {
             return new BigDecimal((BigInteger) value);
         }
-        if (value instanceof Double) {
-            return BigDecimal.valueOf((Double) value);
+        if (value instanceof Double || value instanceof Float) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
         }
         return BigDecimal.valueOf(((Number) value).longValue());
-
     }
 
     private void setBigDecimal(String name, BigDecimal value) {
         if (value.signum() == 0 || value.scale() <= 0 || value.stripTrailingZeros().scale() <= 0) {
             setBigInteger(name, value.toBigIntegerExact());
         } else {
-            values.put(name, value);
+            double dvalue = value.doubleValue();
+            if (value.equals(BigDecimal.valueOf(dvalue))) {
+                setDouble(name, dvalue);
+            } else {
+                values.put(name, value);
+            }
         }
     }
 
@@ -539,6 +595,56 @@ public class Parameters implements Comparable<Parameters> {
         return (value == null) ? ex.eval() : value;
     }
 
+    private static void quote(StringBuilder sb, String string) {
+        if (string == null || string.length() == 0) {
+            sb.append("\"\"");
+        }
+
+        char c = 0;
+        int i;
+        int len = string.length();
+        String t;
+
+        sb.append('"');
+        for (i = 0; i < len; i += 1) {
+            c = string.charAt(i);
+            switch (c) {
+                case '\\':
+                case '"':
+                    sb.append('\\');
+                    sb.append(c);
+                    break;
+                case '/':
+                    sb.append('\\');
+                    sb.append(c);
+                    break;
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                default:
+                    if (c < ' ') {
+                        t = "000" + Integer.toHexString(c);
+                        sb.append("\\u" + t.substring(t.length() - 4));
+                    } else {
+                        sb.append(c);
+                    }
+            }
+        }
+        sb.append('"');
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -552,12 +658,10 @@ public class Parameters implements Comparable<Parameters> {
             }
             String name = nameValue.getKey();
             Object value = nameValue.getValue();
-            sb.append(name);
-            sb.append("=");
+            quote(sb, name);
+            sb.append(":");
             if (value instanceof String) {
-                sb.append("'");
-                sb.append(value);
-                sb.append("'");
+                quote(sb, (String) value);
             } else {
                 sb.append(value);
             }
@@ -565,9 +669,11 @@ public class Parameters implements Comparable<Parameters> {
         sb.append("}");
         return sb.toString();
     }
-    
-    public int size() { return values.size(); }
-    
+
+    public int size() {
+        return values.size();
+    }
+
     public boolean modify(Object object, Field field) {
         try {
             field.setAccessible(true);
@@ -619,6 +725,14 @@ public class Parameters implements Comparable<Parameters> {
             }
             if (clazz.equals(Long.class)) {
                 field.set(object, getLong(name));
+                return true;
+            }
+            if (clazz.equals(float.class)) {
+                field.setFloat(object, getFloat(name));
+                return true;
+            }
+            if (clazz.equals(Float.class)) {
+                field.set(object, getFloat(name));
                 return true;
             }
             if (clazz.equals(double.class)) {
@@ -694,6 +808,10 @@ public class Parameters implements Comparable<Parameters> {
             }
             if (clazz.equals(long.class) || clazz.equals(Long.class)) {
                 set.invoke(object, getLong(name));
+                return true;
+            }
+            if (clazz.equals(float.class) || clazz.equals(Float.class)) {
+                set.invoke(object, getFloat(name));
                 return true;
             }
             if (clazz.equals(double.class) || clazz.equals(Double.class)) {
@@ -828,6 +946,262 @@ public class Parameters implements Comparable<Parameters> {
                 return object;
             } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex2) {
                 throw new RuntimeException(ex2);
+            }
+        }
+
+    }
+
+    private static class Parse {
+
+        CharSequence cs;
+        int at;
+
+        boolean end() {
+            return at >= cs.length();
+        }
+
+        int cp() {
+            return !end() ? Character.codePointAt(cs, at) : -1;
+        }
+
+        void next() {
+            if (!end()) {
+                at += Character.charCount(cp());
+            }
+        }
+
+        boolean white() {
+            return Character.isWhitespace(cp());
+        }
+
+        boolean skipWhite() {
+            while (white()) {
+                next();
+            }
+            return true;
+        }
+
+        boolean match(int m) {
+            int c = cp();
+            if (c == m) {
+                at += Character.charCount(c);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        boolean wsMatch(int m) {
+            int cursor = at;
+            if (skipWhite() && match(m) && skipWhite()) {
+                return true;
+            } else {
+                at = cursor;
+                return false;
+            }
+        }
+
+        boolean parseBigDecimal(BigDecimal[] bdRef) {
+            StringBuilder sb = new StringBuilder();
+            int cursor = at;
+            for (;;) {
+                int c = cp();
+                if (c == '_') {
+                    next();
+                    continue;
+                }
+                if (isNum(c)) {
+                    sb.appendCodePoint(c);
+                    next();
+                    continue;
+                }
+                break;
+            }
+
+            try {
+                bdRef[0] = new BigDecimal(sb.toString());
+            } catch (NumberFormatException ex) {
+                at = cursor;
+                return false;
+            }
+            return true;
+        }
+
+        boolean isHex(int c) {
+            return (('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'));
+        }
+
+        boolean isNum(int c) {
+            return ('0' <= c && c <= '9')
+                    || c == '.' || c == '+' || c == '-' || c == 'e' || c == 'E';
+        }
+
+        boolean parseString(StringBuilder sb) {
+            int cursor = at;
+            if (!match('"')) {
+                at = cursor;
+                return false;
+            }
+            for (;;) {
+                int c = cp();
+                next();
+                if (c == -1) {
+                    at = cursor;
+                    return false;
+                }
+                if (c == '"') {
+                    return true;
+                }
+                if (c != '\\') {
+                    sb.appendCodePoint(c);
+                } else {
+                    int ec = cp();
+                    next();
+                    switch (ec) {
+                        case 'b':
+                            sb.appendCodePoint('\b');
+                            break;
+                        case 't':
+                            sb.appendCodePoint('\t');
+                            break;
+                        case 'n':
+                            sb.appendCodePoint('\n');
+                            break;
+                        case 'f':
+                            sb.appendCodePoint('\f');
+                            break;
+                        case 'r':
+                            sb.appendCodePoint('\r');
+                            break;
+                        case 'u':
+                            int begin = at;
+                            while (at < begin + 4 && isHex(cp())) {
+                                next();
+                            }
+                            if (at > begin) {
+                                int uc = Integer.parseInt(cs.subSequence(begin, at).toString(), 16);
+                                sb.appendCodePoint(uc);
+                            } else {
+                                at = cursor;
+                                return false;
+                            }
+                            break;
+                        default:
+                            sb.appendCodePoint(ec);
+                            break;
+                    }
+                }
+            }
+        }
+
+        boolean parseName(StringBuilder sb) {
+            int cursor = at;
+            int begin = sb.length();
+            if (cp() == ('"')) {
+                if (parseString(sb)) {
+                    if (sb.length() > begin) {
+                        return true;
+                    }
+                }
+            } else {
+                for (;;) {
+                    int c = cp();
+                    if (Character.isWhitespace(c)
+                            || c == ':' || c == '{' || c == '}' || c == ',' || c == '"') {
+                        break;
+                    }
+                    sb.appendCodePoint(c);
+                    at += Character.charCount(c);
+                }
+                if (sb.length() > begin) {
+                    return true;
+                }
+            }
+            at = cursor;
+            return false;
+        }
+
+        boolean parseValue(Parameters p, String name) {
+            int cursor = at;
+            skipWhite();
+            int c = cp();
+            if (c == '{') {
+                Parameters q = new Parameters();
+                if (parseParameters(q)) {
+                    p.setParameters(name, q);
+                    return true;
+                } else {
+                    at = cursor;
+                    return false;
+                }
+            } else if (c == '"') {
+                StringBuilder sb = new StringBuilder();
+                if (parseString(sb)) {
+                    p.setString(name, sb.toString());
+                    return true;
+                } else {
+                    at = cursor;
+                    return false;
+                }
+            } else if (c == 't' || c == 'T' || c == 'f' || c == 'F') {
+                StringBuilder sb = new StringBuilder();
+                if (parseName(sb)) {
+                    String ans = sb.toString().toLowerCase();
+                    if (ans.equals("true")) {
+                        p.setBoolean(name, true);
+                        return true;
+                    } else if (ans.equals("false")) {
+                        p.setBoolean(name, false);
+                        return true;
+                    }
+                }
+                at = cursor;
+                return false;
+
+            } else {
+                BigDecimal[] bdRef = new BigDecimal[1];
+                if (parseBigDecimal(bdRef)) {
+                    p.setBigDecimal(name, bdRef[0]);
+                    return true;
+                } else {
+                    at = cursor;
+                    return false;
+                }
+            }
+        }
+
+        boolean parseParameters(Parameters p) {
+            int cursor = at;
+            if (!wsMatch('{')) {
+                at = cursor;
+                return false;
+            }
+            for (;;) {
+                cursor = at;
+                wsMatch(',');
+                StringBuilder name = new StringBuilder();
+                if (!parseName(name)) {
+                    return wsMatch('}');
+                }
+                if (!wsMatch(':') && !wsMatch('=')) {
+                    at = cursor;
+                    return false;
+                }
+                if (!parseValue(p, name.toString())) {
+                    at = cursor;
+                    return false;
+                }
+            }
+        }
+
+        Parameters parse(CharSequence _cs) {
+            Parameters p = new Parameters();
+            cs = _cs;
+            at = 0;
+            if (parseParameters(p) && end()) {
+                return p;
+            } else {
+                return null;
             }
         }
     }

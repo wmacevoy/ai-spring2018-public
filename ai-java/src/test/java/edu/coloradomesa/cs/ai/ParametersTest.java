@@ -302,9 +302,6 @@ public class ParametersTest {
 
     }
 
-    /**
-     * Test of toString method, of class Parameters.
-     */
     @Test
     public void testToString() {
         Parameters value = Parameters.make()
@@ -312,7 +309,7 @@ public class ParametersTest {
                 .set("beta", "boop")
                 .parameters();
         Parameters p = Parameters.make().set("x", value).parameters();
-        String expect = "{x={alpha=" + Math.PI + ",beta='boop'}}";
+        String expect = "{\"x\":{\"alpha\":" + Math.PI + ",\"beta\":\"boop\"}}";
         assertEquals(expect, p.toString());
     }
 
@@ -324,6 +321,7 @@ public class ParametersTest {
         public short shortValue;
         public int intValue;
         public long longValue;
+        public float floatValue;
         public double doubleValue;
         public BigInteger bigIntegerValue;
         public BigDecimal bigDecimalValue;
@@ -342,6 +340,7 @@ public class ParametersTest {
                 .set("shortValue", 23_000)
                 .set("intValue", 23_000_000)
                 .set("longValue", 23_000_000_000_000L)
+                .set("floatValue", (float) Math.sqrt(2.0))
                 .set("doubleValue", Math.sqrt(2.0))
                 .set("bigIntegerValue", new BigInteger("123456789123456789123456789"))
                 .set("bigDecimalValue", new BigDecimal("123456789123456789123456.789"))
@@ -351,12 +350,13 @@ public class ParametersTest {
 
         Fields f = new Fields();
         p.modify(f);
-        assertEquals(p,f.parameters);
+        assertEquals(p, f.parameters);
         assertEquals(p.getBoolean("booleanValue"), f.booleanValue);
         assertEquals(p.getByte("byteValue"), f.byteValue);
         assertEquals(p.getShort("shortValue"), f.shortValue);
         assertEquals(p.getInt("intValue"), f.intValue);
         assertEquals(p.getLong("longValue"), f.longValue);
+        assertEquals(p.getFloat("floatValue"), f.floatValue, 0.0);
         assertEquals(p.getDouble("doubleValue"), f.doubleValue, 0.0);
         assertEquals(p.getBigInteger("bigIntegerValue"), f.bigIntegerValue);
         assertEquals(p.getBigDecimal("bigDecimalValue"), f.bigDecimalValue);
@@ -420,6 +420,16 @@ public class ParametersTest {
         public void setLongValue(long value) {
             longValue = value;
         }
+        private float floatValue;
+
+        public float getFloatValue() {
+            return floatValue;
+        }
+
+        public void setFloatValue(float value) {
+            floatValue = value;
+        }
+
         private double doubleValue;
 
         public double getDoubleValue() {
@@ -478,6 +488,7 @@ public class ParametersTest {
                 .set("shortValue", 23_000)
                 .set("intValue", 23_000_000)
                 .set("longValue", 23_000_000_000_000L)
+                .set("floatValue", (float) Math.sqrt(2.0))
                 .set("doubleValue", Math.sqrt(2.0))
                 .set("bigIntegerValue", new BigInteger("123456789123456789123456789"))
                 .set("bigDecimalValue", new BigDecimal("123456789123456789123456.789"))
@@ -493,13 +504,14 @@ public class ParametersTest {
         assertEquals(p.getShort("shortValue"), f.getShortValue());
         assertEquals(p.getInt("intValue"), f.getIntValue());
         assertEquals(p.getLong("longValue"), f.getLongValue());
+        assertEquals(p.getFloat("floatValue"), f.getFloatValue(), 0.0);
         assertEquals(p.getDouble("doubleValue"), f.getDoubleValue(), 0.0);
         assertEquals(p.getBigInteger("bigIntegerValue"), f.getBigIntegerValue());
         assertEquals(p.getBigDecimal("bigDecimalValue"), f.getBigDecimalValue());
         assertEquals(p.getString("stringValue"), f.getStringValue());
         assertEquals(p.getParameters("parametersValue"), f.getParametersValue());
     }
-    
+
     static class GetSet2 {
 
         private Parameters parameters;
@@ -556,6 +568,16 @@ public class ParametersTest {
         public void longValue(long value) {
             longValue = value;
         }
+        private float floatValue;
+
+        public float floatValue() {
+            return floatValue;
+        }
+
+        public void floatValue(float value) {
+            floatValue = value;
+        }
+
         private double doubleValue;
 
         public double doubleValue() {
@@ -614,6 +636,7 @@ public class ParametersTest {
                 .set("shortValue", 23_000)
                 .set("intValue", 23_000_000)
                 .set("longValue", 23_000_000_000_000L)
+                .set("floatValue", (float) Math.sqrt(2.0))
                 .set("doubleValue", Math.sqrt(2.0))
                 .set("bigIntegerValue", new BigInteger("123456789123456789123456789"))
                 .set("bigDecimalValue", new BigDecimal("123456789123456789123456.789"))
@@ -629,10 +652,90 @@ public class ParametersTest {
         assertEquals(p.getShort("shortValue"), f.shortValue());
         assertEquals(p.getInt("intValue"), f.intValue());
         assertEquals(p.getLong("longValue"), f.longValue());
+        assertEquals(p.getFloat("floatValue"), f.floatValue(), 0.0);
         assertEquals(p.getDouble("doubleValue"), f.doubleValue(), 0.0);
         assertEquals(p.getBigInteger("bigIntegerValue"), f.bigIntegerValue());
         assertEquals(p.getBigDecimal("bigDecimalValue"), f.bigDecimalValue());
         assertEquals(p.getString("stringValue"), f.stringValue());
         assertEquals(p.getParameters("parametersValue"), f.parametersValue());
     }
+
+    @Test
+    public void testParseBoolean() {
+        Parameters expect = Parameters.make()
+                .set("x", true)
+                .set("y", false)
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":true,\"y\":false}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    public void testParseNumber() {
+        Parameters expect = Parameters.make()
+                .set("x", 3)
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":3}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    public void testParseBigNumber() {
+        Parameters expect = Parameters.make()
+                .set("x", new BigDecimal("987654321987654321987654321.987654321"))
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":987654321987654321987654321.987654321}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    public void testParseDoubleNumber() {
+        Parameters expect = Parameters.make()
+                .set("x", Math.PI)
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":" + Math.PI + "}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    public void testParseString0() {
+        Parameters expect = Parameters.make()
+                .set("x", "")
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":\"\"}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
+    @Test
+    public void testParseString1() {
+        Parameters expect = Parameters.make()
+                .set("x", "three:or more")
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":\"three:or more\"}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+    
+    @Test
+    public void testParseParameters() {
+        Parameters expect = Parameters.make()
+                .set("x", Parameters.make().set("a",1).set("b","two").parameters())
+                .parameters();
+        Parameters result = Parameters.make("{\"x\":{\"a\":1,\"b\":\"two\"}}")
+                .parameters();
+
+        assertEquals(expect, result);
+    }
+
 }
